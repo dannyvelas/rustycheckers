@@ -58,7 +58,7 @@ impl GameEngine {
         }
 
         // Move piece from source to dest
-        self.board[fx][fx] = None;
+        self.board[fx][fy] = None;
         self.board[tx][ty] = Some(piece);
 
         let is_crowned = if self.should_crown(piece, mv.to) {
@@ -72,8 +72,21 @@ impl GameEngine {
 
         Ok(MoveResult {
             mv: mv.clone(),
-            is_crowned: is_crowned,
+            is_crowned
         })
+    }
+
+    pub fn get_piece(&self, coord: Coordinate) -> Result<Option<GamePiece>, ()> {
+        let Coordinate(x, y) = coord;
+        if x <= 7 && y <= 7 {
+            Ok(self.board[x][y])
+        } else {
+            Err(())
+        }
+    }
+
+    pub fn get_current_turn(&self) -> PieceColor {
+        self.current_turn
     }
 
     fn advance_turn(&mut self) {
@@ -130,6 +143,7 @@ impl GameEngine {
                     from: loc.clone(),
                     to: t.clone(),
                 }).collect::<Vec<Move>>();
+
             let mut moves = loc
                 .move_targets_from()
                 .filter(|t| self.valid_move(&p, &loc, &t))
